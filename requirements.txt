@@ -1,0 +1,5 @@
+matplotlib
+tensorflow==2.4.0
+tqdm
+waymo-open-dataset-tf-2-4-0==1.4.1
+
