@@ -1,12 +1,19 @@
 ## Installation
+
+We implement the repo under Ubuntu 16.04 with gcc 5.4.0.
+
+(note: open3d 0.9.0 only fits python<=3.6, and Ubuntu 16.04 only fits open3d<0.10.0)
+
 ```shell
-conda create -n eval_check
+conda create -n eval_check python=3.6
 
 conda activte eval_check
 
 conda install pytorch==1.5.0 torchvision==0.6.0 -c pytorch
 
 pip install -r requirements.txt
+
+pip3 install waymo-open-dataset-tf-2-4-0 --user
 
 cd iou3d_nms && python setup.py build_ext --inplace  # compile necessary iou_nms funcs
 
@@ -15,7 +22,7 @@ cd iou3d_nms && python setup.py build_ext --inplace  # compile necessary iou_nms
 ## Getting Started
 
 It's an unoffical evaluation scripts for Waymo 3D Perception task. It supports basic statistical analysis for 3D perception, 
-including plotting `AP curves` for each type and each level of difficulty and plotting `Score Cut off curves` for TP
+including plotting `AP curves` in each type and each level of difficulty and plotting `Score Cut off curves` for TP
 and FP results. 
 
 ### Introduction
