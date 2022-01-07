@@ -62,7 +62,7 @@ For .bin file, the Waymo Official submission file, use `--det_input_form bin` to
               center_x, center_y, center_z,
               width, length, height, heading
             },
-            type: TYPE_CLASS, e.g:[TYPE_VEHICLE]       
+            type: TYPE_CLASS, e.g:[TYPE_VEHICLE], for {1: 'Vehicle', 2: 'Pedestrian', 3: 'Sign', 4: 'Cyclist'}    
         }
     },
         
@@ -103,7 +103,7 @@ For 3dal pickle, it's a list for each frame, and use `--det_input_form 3dal_pick
 ]
 ```
 
-### Statistic calculation
+### Statistic Calculation
 Running `python statistic.py` to calculate basic statistical results 
 
 by specify `--det_result_pkl_path`, `--gt_info_pkl_path`,
