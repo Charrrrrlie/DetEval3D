@@ -1,9 +1,10 @@
 import os.path
+import pdb
 
 from waymo_eval_utils.evals import WaymoDetectionMetricsEstimator
 from waymo_eval_utils.loaders import *
 from waymo_eval_utils.utils import *
-from visual_utils.plot_utils import plot_auc
+from waymo_eval_utils.visualize import plot_auc
 import argparse
 import logging
 import copy
@@ -33,6 +34,7 @@ def parse_config():
     parser.add_argument('--info_with_fakelidar', action='store_true', default=False)
     parser.add_argument('--distance_thresh', type=int, default=1000)
 
+    parser.add_argument('--single_seq_demo', action='store_true', default=False)
     parser.add_argument('--det_input_form', type=str, default='bin',
                         help='The detection input form, optional: [\'bin\',\'ctp_pickle\',\'3dal_pickle\']')
 
@@ -58,7 +60,6 @@ def find_match(det_boxes3d, gt_boxes3d, device='cuda:0'):
     gt_boxes3d = torch.from_numpy(gt_boxes3d).cuda(device=device).float().reshape(-1, 7)
 
     iou3d, iou2d = boxes_iou3d2d_gpu(det_boxes3d, gt_boxes3d)
-
     iou_val, iou_idx = torch.max(iou3d, dim=1)
 
     iou_val = iou_val.cpu().numpy()
@@ -113,7 +114,6 @@ def base_detection_eval(eval_gt_annos, eval_det_annos, evaluator, logger,
     logger.info("Start to calculate FP and TP!")
 
     for type in class_name:
-
         temp_nd = len(det[type]['score'])
         temp_tp = [0] * temp_nd
         temp_fp = [1] * temp_nd
@@ -213,7 +213,6 @@ def base_detection_eval(eval_gt_annos, eval_det_annos, evaluator, logger,
 
 
 def preprocessing(args, logger):
-
     eval_gt_annos = []
     eval_det_annos = []
 
@@ -277,10 +276,72 @@ def preprocessing(args, logger):
 
     return eval_det_annos, eval_gt_annos
 
+
+def process_single_seq(args, logger, scene_name, scene_id):
+    eval_gt_annos = []
+    eval_det_annos = []
+
+    # ## loading detection results in different forms ## #
+    if args.det_input_form == '3dal_pickle':
+        det_result = pickle.load(open(args.det_result_path, 'rb'))
+    else:
+        if args.det_input_form == 'bin':
+            det_result = bin_loader(args.det_result_path)
+            raw_map = {1: 'Vehicle', 2: 'Pedestrian', 3: 'Sign', 4: 'Cyclist'}
+
+            with open(args.info_path, 'rb') as f:
+                info = pickle.load(f)
+
+            det_result = data_convert(det_result, info, raw_map, [3])  # mask num:[3]
+
+        elif args.det_input_form == 'ctp_pickle':
+            # list of pickle data
+            det_result, _ = pickle_loader(args.det_result_path, from_s3=False)
+            raw_map = {0: 'Vehicle', 1: 'Pedestrian', 2: 'Cyclist'}
+
+            with open(args.info_path, 'rb') as f:
+                info = pickle.load(f)
+
+            det_result = data_convert(det_result, info, raw_map, [3])  # mask num:[3]
+        
+        # used for tracking
+        elif args.det_input_form == 'temp_pickle': 
+            data = pickle.load(open(args.det_result_path, 'rb'))
+            det_result = defaultdict(dict)
+
+            for item in data:
+                det_result[item['sequence_name']][str(item['frame_id'])] = item
+
+            # det_result, _ = pickle_loader(args.det_result_path, from_s3=False)
+
+        else:
+            raise NotImplementedError
+
+
+    # ## loading gt results in different forms ## #
+    if 's3' in args.gt_info_pkl_path:
+        client = Client(args.petrel_oss_config)
+        gt_result_table, gt_result_len = pickle_loader(args.gt_info_pkl_path, client=client, from_s3=True)
+    else:
+        gt_result_table, gt_result_len = pickle_loader(args.gt_info_pkl_path, from_s3=False)
+
+    # for sname, sid in zip(scene_name, scene_id):
+    eval_det_annos.append(det_result[scene_name.split('segment-')[-1].split('_with_camera_labels')[0]][scene_id])
+    eval_gt_annos.append(gt_result_table[scene_name][int(scene_id)]['annos'])
+
+    return eval_det_annos, eval_gt_annos
+
+
 def main():
     args, logger = parse_config()
 
-    eval_det_annos, eval_gt_annos = preprocessing(args,logger)
+    if args.single_seq_demo:
+        sname = 'segment-7493781117404461396_2140_000_2160_000_with_camera_labels'
+        sid = '2'
+        args.output_path = './output/' + args.det_result_path.split('/')[-1]
+        eval_det_annos, eval_gt_annos = process_single_seq(args, logger, sname, sid)
+    else:
+        eval_det_annos, eval_gt_annos = preprocessing(args, logger)
 
     # What's dumped in demo
     # eval_det_annos = eval_det_annos[:50]
@@ -293,11 +354,11 @@ def main():
 
     logger.info('Start Evaluation')
     evaluator = WaymoDetectionMetricsEstimator()
-
+    
     eval_tuple = base_detection_eval(eval_gt_annos, eval_det_annos, evaluator, logger,
-                                                            class_name=args.class_name,
-                                                            distance_thresh=args.distance_thresh,
-                                                            fake_gt_infos=args.info_with_fakelidar)
+                                     class_name=args.class_name,
+                                     distance_thresh=args.distance_thresh,
+                                     fake_gt_infos=args.info_with_fakelidar)
 
     logger.info("Start to Save Evaluation Result!")
     save_dict = ['/tp.pkl', '/fp.pkl', '/tp_sct.pkl', '/fp_sct.pkl',
@@ -352,6 +413,3 @@ def demo():
 if __name__ == '__main__':
     main()
     # demo()
-
-
-
