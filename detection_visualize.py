@@ -14,7 +14,7 @@ def parse_config():
                         help='Path to ground-truth info pkl file.')
 
     parser.add_argument('--det_input_form', type=str, default='bin',
-                        help='The detection input form, optional: [\'bin\',\'ctp_pickle\',\'3dal_pickle\']')
+                        help='The detection input form, optional: [\'bin\',\'ctp_pkl\',\'3dal_pkl\']')
     parser.add_argument('--det_score_form', type=str, default='none',
                         help='Visualize scores for detection results, optional:[\'none\',\'conf\',\'iou\']')
     parser.add_argument('--info_path', type=str, default='./info_map/sequence_info_val.pkl',
