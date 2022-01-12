@@ -160,7 +160,7 @@ Before that, remember to modify `path` and `labels` in main function in a list o
 
 Running `python detection_visualize.py`
 
-Before that, remember to modify `sequence_name` and `frame_num` in main function in a list of all results you want to visualize.
+Before that, remember to modify `sequence_name` and `frame_num` in main function you want to visualize.
 
 For details, using -h to help:
 ```shell
