@@ -1,9 +1,19 @@
+# DetEval3D
+It's an unofficial evaluation script for Waymo 3D Perception task. It supports basic statistical analysis for 3D perception.
+
+But here's one thing that needs to be mentioned, `our results will be slightly different from the official one` due to detailed calculation methods for area under curve.
+
+For official online evaluation, you can refer to our [online submission document](docs/waymo_official_submission.md) or follow the [official document](https://github.com/waymo-research/waymo-open-dataset/blob/master/docs/quick_start.md).
+
+For official offline evaluation, you can refer to our [offline evaluation document](docs/waymo_offline_evaluation.md)
+
+
 ## Features
 
 - [x] TP and FP Caclulation
 - [x] PR Curve and Score Cut Off Visualization
 - [x] Bounding boxes and Point Cloud Visualization
-- [ ] Waymo Official Evaluation Tool
+- [x] Waymo Official Evaluation Tool
 - [ ] Align Evaluation Results with the Official One.
 
 ## Installation
@@ -28,9 +38,6 @@ cd iou3d_nms && python setup.py build_ext --inplace  # compile necessary iou_nms
 ```
 
 ## Getting Started
-
-It's an unoffical evaluation scripts for Waymo 3D Perception task. It supports basic statistical analysis for 3D perception, 
-including plotting `AP curves` in each type and each level of difficulty and plotting `Score Cut Off curves` for TP and FP results. 
 
 ### Introduction
 
@@ -121,7 +128,7 @@ For details, using -h to help:
 optional arguments:
   -h, --help            show this help message and exit
 
-  --det_result_path DET_RESULT_PKL_PATH
+  --det_result_path DET_RESULT_PATH
                         Path to the prediction result file.
 
   --gt_info_pkl_path GT_INFO_PKL_PATH
@@ -167,7 +174,7 @@ For details, using -h to help:
 optional arguments:
   -h, --help            show this help message and exit
   --det_result_path DET_RESULT_PATH
-                        Path to the prediction result pkl file.
+                        Path to the prediction result file.
   --gt_info_pkl_path GT_INFO_PKL_PATH
                         Path to ground-truth info pkl file.
   --det_input_form DET_INPUT_FORM

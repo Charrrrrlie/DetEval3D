@@ -13,10 +13,10 @@ from tqdm import tqdm
 
 
 def parse_config():
-    parser = argparse.ArgumentParser(description='Offline evaluation tool for Waymo.')
+    parser = argparse.ArgumentParser(description='Offline evaluation tool for waymo.')
     parser.add_argument('--det_result_path', type=str,
                         default='./val_res/5sweep1stg_detection_pred.bin',
-                        help='Path to the prediction result pkl file.')
+                        help='Path to the prediction result file.')
     parser.add_argument('--gt_info_pkl_path', type=str,
                         default='s3://Datasets/Waymo/gt_infos/centerpoint_align_onesweep.gt_infos/gt.val.pkl',
                         help='Path to ground-truth info pkl file.')
@@ -283,7 +283,11 @@ def process_single_seq(args, logger, scene_name, scene_id):
 
     # ## loading detection results in different forms ## #
     if args.det_input_form == '3dal_pickle':
-        det_result = pickle.load(open(args.det_result_path, 'rb'))
+        data = pickle.load(open(args.det_result_path, 'rb'))
+        det_result = defaultdict(dict)
+
+        for item in data:
+            det_result[item['sequence_name']][str(item['frame_id'])] = item
     else:
         if args.det_input_form == 'bin':
             det_result = bin_loader(args.det_result_path)
@@ -303,16 +307,6 @@ def process_single_seq(args, logger, scene_name, scene_id):
                 info = pickle.load(f)
 
             det_result = data_convert(det_result, info, raw_map, [3])  # mask num:[3]
-        
-        # used for tracking
-        elif args.det_input_form == 'temp_pickle': 
-            data = pickle.load(open(args.det_result_path, 'rb'))
-            det_result = defaultdict(dict)
-
-            for item in data:
-                det_result[item['sequence_name']][str(item['frame_id'])] = item
-
-            # det_result, _ = pickle_loader(args.det_result_path, from_s3=False)
 
         else:
             raise NotImplementedError
@@ -336,7 +330,7 @@ def main():
     args, logger = parse_config()
 
     if args.single_seq_demo:
-        sname = 'segment-7493781117404461396_2140_000_2160_000_with_camera_labels'
+        sname = 'segment-8079607115087394458_1240_000_1260_000_with_camera_labels'
         sid = '2'
         args.output_path = './output/' + args.det_result_path.split('/')[-1]
         eval_det_annos, eval_gt_annos = process_single_seq(args, logger, sname, sid)
@@ -354,7 +348,9 @@ def main():
 
     logger.info('Start Evaluation')
     evaluator = WaymoDetectionMetricsEstimator()
-    
+    # #TODO remember to set back
+    # args.class_name = ['Vehicle']
+    #import pdb;pdb.set_trace()
     eval_tuple = base_detection_eval(eval_gt_annos, eval_det_annos, evaluator, logger,
                                      class_name=args.class_name,
                                      distance_thresh=args.distance_thresh,

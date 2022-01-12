@@ -82,14 +82,26 @@ class WaymoDetectionMetricsEstimator(tf.test.TestCase):
 
         return frame_id, boxes3d, obj_type, score, overlap_nlz, difficulty
 
-    def build_config(self):
+    def build_config(self, config_type):
         config = metrics_pb2.Config()
-        config_text = """
-        breakdown_generator_ids: OBJECT_TYPE
-        difficulties {
-        levels:1
-        levels:2
-        }
+        config_text = ''
+        if 'object' in config_type:
+            config_text += '''
+            breakdown_generator_ids: OBJECT_TYPE
+            difficulties {
+                levels:1
+                levels:2
+            }
+            '''
+        if 'range' in config_type:
+            config_text += '''
+            breakdown_generator_ids: RANGE
+            difficulties {
+                levels:1
+                levels:2
+            }
+            '''
+        config_text += '''
         matcher_type: TYPE_HUNGARIAN
         iou_thresholds: 0.0
         iou_thresholds: 0.7
@@ -97,16 +109,17 @@ class WaymoDetectionMetricsEstimator(tf.test.TestCase):
         iou_thresholds: 0.5
         iou_thresholds: 0.5
         box_type: TYPE_3D
-        """
+        '''
 
         for x in range(0, 100):
             config.score_cutoffs.append(x * 0.01)
         config.score_cutoffs.append(1.0)
 
         text_format.Merge(config_text, config)
+
         return config
 
-    def build_graph(self, graph):
+    def build_graph(self, graph, config_type):
         with graph.as_default():
             self._pd_frame_id = tf.compat.v1.placeholder(dtype=tf.int64)
             self._pd_bbox = tf.compat.v1.placeholder(dtype=tf.float32)
@@ -119,7 +132,7 @@ class WaymoDetectionMetricsEstimator(tf.test.TestCase):
             self._gt_type = tf.compat.v1.placeholder(dtype=tf.uint8)
             self._gt_difficulty = tf.compat.v1.placeholder(dtype=tf.uint8)
             metrics = detection_metrics.get_detection_metric_ops(
-                config=self.build_config(),
+                config=self.build_config(config_type),
                 prediction_frame_id=self._pd_frame_id,
                 prediction_bbox=self._pd_bbox,
                 prediction_type=self._pd_type,
@@ -174,7 +187,9 @@ class WaymoDetectionMetricsEstimator(tf.test.TestCase):
 
         return tuple(ret_ans)
 
-    def waymo_evaluation(self, prediction_infos, gt_infos, class_name, distance_thresh=100, fake_gt_infos=True):
+    def waymo_evaluation(self, prediction_infos, gt_infos, class_name, config_type, distance_thresh=100,
+                         fake_gt_infos=True):
+        # tf.debugging.set_log_device_placement(True)
         print('Start the waymo evaluation...')
         assert len(prediction_infos) == len(gt_infos), '%d vs %d' % (prediction_infos.__len__(), gt_infos.__len__())
 
@@ -202,7 +217,8 @@ class WaymoDetectionMetricsEstimator(tf.test.TestCase):
             print('Warning: Waymo evaluation only supports normalized scores')
 
         graph = tf.Graph()
-        metrics = self.build_graph(graph)
+        metrics = self.build_graph(graph, config_type)
+        # with graph.device('/GPU:0'):
         with self.test_session(graph=graph) as sess:
             sess.run(tf.compat.v1.initializers.local_variables())
             self.run_eval_ops(
@@ -237,6 +253,8 @@ def main():
     parser.add_argument('--pred_infos', type=str, default=None, help='pickle file')
     parser.add_argument('--gt_infos', type=str, default=None, help='pickle file')
     parser.add_argument('--class_names', type=str, nargs='+', default=['Vehicle', 'Pedestrian', 'Cyclist'], help='')
+    parser.add_argument('--evaluate_metrics', nargs='+', default=['object'],
+                        help='metrics that used in evaluation. support multiple (object, range)')
     parser.add_argument('--sampled_interval', type=int, default=5, help='sampled interval for GT sequences')
     args = parser.parse_args()
 
@@ -244,7 +262,7 @@ def main():
     gt_infos = pickle.load(open(args.gt_infos, 'rb'))
 
     print('Start to evaluate the waymo format results...')
-    eval = WaymoDetectionMetricsEstimator()
+    evaluator = WaymoDetectionMetricsEstimator()
 
     gt_infos_dst = []
     for idx in range(0, len(gt_infos), args.sampled_interval):
@@ -252,8 +270,9 @@ def main():
         cur_info['frame_id'] = gt_infos[idx]['frame_id']
         gt_infos_dst.append(cur_info)
 
-    waymo_AP = eval.waymo_evaluation(
-        pred_infos, gt_infos_dst, class_name=args.class_names, distance_thresh=1000, fake_gt_infos=True
+    waymo_AP = evaluator.waymo_evaluation(
+        pred_infos, gt_infos_dst, config_type=args.evaluate_metrics, class_name=args.class_names,
+        distance_thresh=1000, fake_gt_infos=True
     )
 
     print(waymo_AP)

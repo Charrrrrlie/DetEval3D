@@ -8,7 +8,7 @@ def parse_config():
     parser = argparse.ArgumentParser(description='Bounding boxes visualization tool for Waymo.')
     parser.add_argument('--det_result_path', type=str,
                         default='./val_res/5sweep1stg_detection_pred.bin',
-                        help='Path to the prediction result pkl file.')
+                        help='Path to the prediction result file.')
     parser.add_argument('--gt_info_pkl_path', type=str,
                         default='s3://Datasets/Waymo/gt_infos/centerpoint_align_onesweep.gt_infos/gt.val.pkl',
                         help='Path to ground-truth info pkl file.')
