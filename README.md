@@ -1,10 +1,11 @@
 ## Features
 
-- [x] TP and FP caclulation
-- [x] PR Curve and Score Cut Off visualization
-- [x] Bounding boxes and Point Cloud visualization
+- [x] TP and FP Caclulation
+- [x] PR Curve and Score Cut Off Visualization
+- [x] Bounding boxes and Point Cloud Visualization
 - [ ] Waymo Official Evaluation Tool
-  
+- [ ] Align Evaluation Results with the Official One.
+
 ## Installation
 
 We implement the repo under Ubuntu 16.04 with gcc 5.4.0.
@@ -29,8 +30,7 @@ cd iou3d_nms && python setup.py build_ext --inplace  # compile necessary iou_nms
 ## Getting Started
 
 It's an unoffical evaluation scripts for Waymo 3D Perception task. It supports basic statistical analysis for 3D perception, 
-including plotting `AP curves` in each type and each level of difficulty and plotting `Score Cut off curves` for TP
-and FP results. 
+including plotting `AP curves` in each type and each level of difficulty and plotting `Score Cut Off curves` for TP and FP results. 
 
 ### Introduction
 
@@ -183,4 +183,4 @@ optional arguments:
 ## Friend links
 [Waymo Protos](https://github.com/waymo-research/waymo-open-dataset)
 
-[AP calculation in 2D detection](https://github.com/Cartucho/mAP)
+[AP Calculation in 2D Detection](https://github.com/Cartucho/mAP)
