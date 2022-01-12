@@ -1,3 +1,10 @@
+## Features
+
+- [x] TP and FP caclulation
+- [x] PR Curve and Score Cut Off visualization
+- [x] Bounding boxes and Point Cloud visualization
+- [ ] Waymo Official Evaluation Tool
+  
 ## Installation
 
 We implement the repo under Ubuntu 16.04 with gcc 5.4.0.
