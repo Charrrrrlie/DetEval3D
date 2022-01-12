@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 
 def parse_config():
-    parser = argparse.ArgumentParser(description='Offline evaluation tool for waymo.')
+    parser = argparse.ArgumentParser(description='Offline evaluation tool for Waymo.')
     parser.add_argument('--det_result_path', type=str,
                         default='./val_res/5sweep1stg_detection_pred.bin',
                         help='Path to the prediction result pkl file.')

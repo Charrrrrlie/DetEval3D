@@ -149,6 +149,30 @@ Running `python visualizer.py`
 
 Before that, remember to modify `path` and `labels` in main function in a list of all results you want to visualize.
 
+### Bounding Boxes Visualization
+
+Running `python detection_visualize.py`
+
+Before that, remember to modify `sequence_name` and `frame_num` in main function in a list of all results you want to visualize.
+
+For details, using -h to help:
+```shell
+optional arguments:
+  -h, --help            show this help message and exit
+  --det_result_path DET_RESULT_PATH
+                        Path to the prediction result pkl file.
+  --gt_info_pkl_path GT_INFO_PKL_PATH
+                        Path to ground-truth info pkl file.
+  --det_input_form DET_INPUT_FORM
+                        The detection input form, optional:
+                        ['bin','ctp_pickle','3dal_pickle']
+  --det_score_form DET_SCORE_FORM
+                        Visualize scores for detection results,
+                        optional:['none','conf','iou']
+  --info_path INFO_PATH
+                        Sequence name to frame id map
+```
+
 ## Friend links
 [Waymo Protos](https://github.com/waymo-research/waymo-open-dataset)
 
