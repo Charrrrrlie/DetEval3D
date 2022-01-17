@@ -218,7 +218,7 @@ def preprocessing(args, logger):
 
     # ## loading detection results in different forms ## #
     if args.det_input_form == '3dal_pickle':
-        det_result = pickle.load(open(args.det_result_pkl_path, 'rb'))
+        det_result = pickle.load(open(args.det_result_path, 'rb'))
     else:
         if args.det_input_form == 'bin':
             det_result = bin_loader(args.det_result_path)
