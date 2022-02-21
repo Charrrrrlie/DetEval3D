@@ -75,7 +75,7 @@ optional arguments:
                         "Pedestrian", "Cyclist"]
   --info_with_fakelidar
   --distance_thresh DISTANCE_THRESH
-  --raw_map_path RAW_MAP_PATH
+  --info_path INFO_PATH
                         Sequence name to frame id map
   --det_input_form DET_INPUT_FORM
                         The detection input form, optional:

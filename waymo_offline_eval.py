@@ -32,7 +32,7 @@ def parse_config():
     parser.add_argument('--info_with_fakelidar', action='store_true', default=False)
     parser.add_argument('--distance_thresh', type=int, default=1000)
 
-    parser.add_argument('--raw_map_path', type=str, default='./info_map/sequence_info_val.pkl',
+    parser.add_argument('--info_path', type=str, default='./info_map/sequence_info_val.pkl',
                         help='Sequence name to frame id map')
     parser.add_argument('--det_input_form', type=str, default='bin',
                         help='The detection input form, optional: [\'bin\',\'ctp_pickle\',\'3dal_pickle\']')
