@@ -132,7 +132,7 @@ def vis_box(boxes, vis=None, labels=[], color=(1, 0, 0)):
 
     return vis
 
-
+# cool gray (0.549,0.5725,0.6745)
 def vis_pc(points, vis=None, color=None):
 
     if not vis:
@@ -148,6 +148,9 @@ def vis_pc(points, vis=None, color=None):
 
     # mesh_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=10, origin=origin)
     # vis.add_geometry(mesh_frame)
+    render_option: o3d.visualization.RenderOption = vis.get_render_option()	#设置点云渲染参数
+    render_option.background_color = np.array([0, 0, 0])	#设置背景色（这里为黑色）
+    render_option.point_size = 2.0	#设置渲染点的大小
 
     vis.add_geometry(pcd)
 
